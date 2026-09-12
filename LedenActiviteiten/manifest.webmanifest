@@ -1,0 +1,15 @@
+{
+  "name": "Ledenpagina Steenbrugge", 
+  "short_name": "LS",
+  "description": "Ledenpagina van de muziekvereniging steenbrugge",
+  "scope": "/LedenActiviteiten/",
+  "start_url": "/LedenActiviteiten/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone",
+  "icons": [{
+    "src": "img/icon.png",
+    "type": "image/png",
+    "sizes": "700x700"
+  }]
+}
