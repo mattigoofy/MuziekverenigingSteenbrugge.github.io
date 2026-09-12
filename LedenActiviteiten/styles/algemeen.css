@@ -12,6 +12,7 @@ body {
   align-items: center;
   height: 100vh;
   font-size: 100%;
+  overflow: hidden;
 }
 
 a {

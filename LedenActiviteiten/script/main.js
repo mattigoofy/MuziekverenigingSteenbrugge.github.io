@@ -26,8 +26,9 @@ for(let i=0;i<containers.length; i++){
     if(containerID != undefined) {
         containerID = containerID.replaceAll("<br>", " ");
         if(containerID == URLevent){
-            containers[i].style.display = "grid";
-            containers[0].style.display = "none";
+            containers[i].classList.add('active');
+            containers[0].classList.remove('active');
+            containers[0].classList.add('prev');
             break;
         }
     }

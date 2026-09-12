@@ -10,7 +10,50 @@
   width: 80%;
   position: absolute;
   top: 10%;
-  display: none;
+  left: 10%;
+  transform: translateX(100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
+  z-index: 1;
+}
+
+.container.active {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
+  z-index: 10;
+}
+
+.container.prev {
+  transform: translateX(-100%);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.container.next {
+  transform: translateX(100%);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.container.prev.active {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
+  z-index: 10;
+}
+
+.container.next.active {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
+  z-index: 10;
 }
 
 .header {

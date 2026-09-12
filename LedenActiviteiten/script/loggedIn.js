@@ -4,7 +4,7 @@ import { updateEvents, updateScore } from "./events.js";
 export { loggedIn };
 
 function loggedIn() {
-    document.getElementById("main").style.display = "block";
+    document.getElementById("main").classList.add('active');
     document.getElementById("login").style.display = "none";
     document.getElementById("loadingText").style.display = "block";
     localStorage.setItem("emailAanwezighedenFanfare", state.email);
