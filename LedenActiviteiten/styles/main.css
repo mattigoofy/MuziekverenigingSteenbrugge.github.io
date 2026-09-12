@@ -1,0 +1,43 @@
+/*
+ * main
+ */
+#logOut_email {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  text-align: right;
+}
+
+#logOutButton {
+  display: none;
+  margin-bottom: 5%;
+}
+
+#score_edit {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  text-align: left;
+}
+
+#editButton {
+  display: none;
+  margin-bottom: 10%;
+}
+
+#toonAllesLabel {
+  display: none;
+  position: absolute;
+  left: 10px;
+  top: 12vh;
+  text-align: left;
+  margin-top: 1%;
+}
+
+#breaksForMobile {
+  display: none;
+}
+
+#mainTitle {
+  margin-top: 0;
+}

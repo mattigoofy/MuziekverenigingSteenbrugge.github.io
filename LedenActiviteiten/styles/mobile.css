@@ -1,0 +1,66 @@
+/*
+ * mobile
+ */
+@media screen and (max-width: 1000px) {
+  body {
+    font-size: 200%;
+  }
+
+  b {
+    font-size: 110%;
+  }
+
+  #login {
+    font-size: 150%;
+  }
+
+  input {
+    width: 30%;
+    font-size: 100%;
+  }
+
+  input[type="radio"] {
+    width: 50px;
+    height: 50px;
+  }
+
+  .header {
+    margin-top: 12%;
+  }
+
+  #breaksForMobile {
+    display: block;
+  }
+
+  #toonAllesLabel {
+    top: 1vh;
+    left: 50%;
+    width: 30%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+  }
+
+  #toonAllesInput {
+    display: inline;
+    transform: scale(2);
+    margin-left: 10px;
+  }
+
+  #mainTitle {
+    margin-top: 12%;
+  }
+
+  .events span {
+    margin-bottom: 20%;
+    font-size: 80%;
+  }
+
+  .nextButton {
+    margin-top: 12%;
+  }
+
+  .previousButton {
+    margin-top: 12%;
+  }
+}

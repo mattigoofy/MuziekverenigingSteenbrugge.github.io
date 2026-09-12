@@ -1,0 +1,33 @@
+/*
+ * info_events
+ */
+.homeButton {
+  position: absolute;
+  font-size: 100%;
+  justify-self: center;
+}
+
+.nextButton {
+  position: absolute;
+  right: 5px;
+  margin-top: 5%;
+  background-color: grey;
+  z-index: 10;
+}
+
+.previousButton {
+  position: absolute;
+  left: 5px;
+  margin-top: 5%;
+  background-color: grey;
+  z-index: 10;
+}
+
+.infoEvent {
+  display: block;
+  position: relative;
+  left: 25%;
+  width: 50%;
+  text-align: left;
+  word-wrap: break-word;
+}

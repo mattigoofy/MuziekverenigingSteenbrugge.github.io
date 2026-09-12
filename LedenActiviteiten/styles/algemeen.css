@@ -1,0 +1,47 @@
+/*
+ * algemeen
+ */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #001f3f;
+  color: #FFDC00;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 100%;
+}
+
+a {
+  color: #FFDC00;
+}
+
+b {
+  font-weight: 900;
+  font-size: large;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #FFDC00;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #001f3f;
+  font-size: 1em;
+}
+
+button:hover {
+  background-color: #FFAC00;
+}
+
+button:disabled {
+  background-color: grey;
+}
+
+button.disabled {
+  background-color: grey;
+}

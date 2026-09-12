@@ -1,0 +1,29 @@
+/*
+ * containers
+ */
+.container {
+  text-align: center;
+  background-color: #011627;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  position: absolute;
+  top: 10%;
+  display: none;
+}
+
+.header {
+  margin-bottom: 20px;
+  margin-top: 5%;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5em;
+}
