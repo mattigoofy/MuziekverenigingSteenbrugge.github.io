@@ -2,13 +2,13 @@
   "name": "Ledenpagina Steenbrugge", 
   "short_name": "LS",
   "description": "Ledenpagina van de muziekvereniging steenbrugge",
-  "scope": "/LedenActiviteiten/",
-  "start_url": "/LedenActiviteiten/",
+  "scope": "/MuziekverenigingSteenbrugge.github.io/LedenActiviteiten/",
+  "start_url": "/MuziekverenigingSteenbrugge.github.io/LedenActiviteiten/",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "display": "standalone",
   "icons": [{
-    "src": "img/icon.png",
+    "src": "/LedenActiviteiten/img/icon.png",
     "type": "image/png",
     "sizes": "700x700"
   }]

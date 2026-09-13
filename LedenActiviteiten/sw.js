@@ -1,4 +1,4 @@
-var GHPATH = '/LedenActiviteiten';
+var GHPATH = '/MuziekverenigingSteenbrugge.github.io/LedenActiviteiten';
 var APP_PREFIX = 'gppwa_';
 var VERSION = 'version_001';
 var URLS = [
