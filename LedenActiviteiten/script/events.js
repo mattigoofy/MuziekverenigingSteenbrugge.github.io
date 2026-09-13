@@ -12,8 +12,9 @@ function createEvent(eventName, userValue, eventInfo) {
     eventTitle.addEventListener('click', (event) => {
         event.preventDefault();
         document.getElementById("main").classList.remove('active', 'prev', 'next');
+        document.getElementById("main").classList.add('prev');
+        document.getElementById("info_"+eventName).classList.remove('prev', 'next');
         document.getElementById("info_"+eventName).classList.add('active');
-
     });
     eventsContainer.appendChild(eventTitle);
 
