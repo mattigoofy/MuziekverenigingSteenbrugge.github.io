@@ -11,10 +11,8 @@ function createEvent(eventName, userValue, eventInfo) {
     eventTitle.innerHTML = eventName;
     eventTitle.addEventListener('click', (event) => {
         event.preventDefault();
-        document.getElementById("main").classList.remove('active', 'prev', 'next');
-        document.getElementById("main").classList.add('prev');
-        document.getElementById("info_"+eventName).classList.remove('prev', 'next');
-        document.getElementById("info_"+eventName).classList.add('active');
+        document.getElementById("main").classList.remove('active');
+        document.getElementById("info_" + eventName).classList.add('active');
     });
     eventsContainer.appendChild(eventTitle);
 
@@ -53,16 +51,13 @@ function createEvent(eventName, userValue, eventInfo) {
     const event = document.createElement("div");
     event.className = "container";
     event.id = "info_" + eventName;
-    event.classList.remove('active');
 
     const homeButton = document.createElement("button");
     homeButton.className = "homeButton";
     homeButton.textContent = "HOME";
     homeButton.addEventListener('click', function() {
         document.getElementById("main").classList.add('active');
-        document.getElementById("main").classList.remove('prev', 'next');
         document.getElementById("info_" + eventName).classList.remove('active');
-        document.getElementById("info_" + eventName).classList.add('next');
     })
 
     const nextButton = document.createElement("button");
@@ -124,24 +119,8 @@ function moveToNextPage(direction){
     }
 
     if(next != undefined && current != undefined) {
-        // Reset classes for both containers
-        current.classList.remove('active', 'prev', 'next');
-        next.classList.remove('active', 'prev', 'next');
-
-        // Apply directional classes for sliding animation
-        if(direction == "left") {
-            // Swiping left means going to previous container
-            // Current container slides right (off-screen to the right)
-            // Next container comes from the left (off-screen to the left)
-            current.classList.add('next');
-            next.classList.add('prev', 'active');
-        } else if(direction == "right") {
-            // Swiping right means going to next container
-            // Current container slides left (off-screen to the left)
-            // Next container comes from the right (off-screen to the right)
-            current.classList.add('prev');
-            next.classList.add('next', 'active');
-        }
+        current.classList.remove('active');
+        next.classList.add('active');
     }
 }
 
