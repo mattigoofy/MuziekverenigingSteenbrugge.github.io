@@ -3,8 +3,9 @@
  */
 .homeButton {
   position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 100%;
-  justify-self: center;
 }
 
 .nextButton {
