@@ -1,0 +1,31 @@
+/* Minimal theme overrides - Bootstrap handles layout */
+body {
+  background-color: #001f3f;
+  color: #FFDC00;
+}
+
+a { color: #FFDC00; }
+
+.event-title,
+.radio-group {
+  background-color: #022b45;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#title { color: #FFDC00; }
+
+.events { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+
+.events span { transform: rotate(-45deg); font-size: 0.9em; text-align: center; }
+
+.radio-group { display: flex; justify-content: center; align-items: center; }
+
+input[type="radio"] { width: 20px; height: 20px; margin: 0 5px; accent-color: #FFDC00; }
+
+.infoEvent { padding: 10px; background-color: #022b45; border-radius: 4px; word-wrap: break-word; }
+
+@media (max-width: 768px) {
+  .events { grid-template-columns: 1fr; }
+  .events span { transform: none; display: block; margin: 5px 0; }
+}
