@@ -1,0 +1,67 @@
+/* ===== Theme colors ===== */
+[data-bs-theme="dark"] {
+  --bs-body-bg: #37373E;
+  --card-bg: #011627;
+  --cell-bg: #022b45;
+  --radio-bg: #0b2238;
+  --radio-border: #9cc4f0;
+}
+
+.card { --bs-card-bg: var(--card-bg); }
+
+/* ===== Table cells ===== */
+.table {
+  --bs-table-bg: var(--cell-bg);
+  border-collapse: separate;
+  border-spacing: 6px;
+  width: calc(100% + 12px);
+  margin: -6px;
+}
+.table > :not(caption) > * > * { border-bottom-width: 0; }
+.table tbody td { border-radius: 8px; }
+.table thead th { background: transparent; box-shadow: none; }
+
+/* ===== Radio buttons ===== */
+.form-check-input[type="radio"] {
+  width: 1.5em;
+  height: 1.5em;
+  margin: 0;
+  background-color: var(--radio-bg);
+  border: 2px solid var(--radio-border);
+}
+.form-check-input[type="radio"]:checked {
+  background-color: var(--bs-warning);
+  border-color: var(--bs-warning);
+  --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23000'/%3e%3c/svg%3e");
+}
+.form-check-input[type="radio"]:disabled { opacity: 0.6; }
+.form-check-input[type="radio"]:disabled:checked { opacity: 1; }
+
+/* ===== Swipe ===== */
+.stage { touch-action: pan-y; }
+
+.swipe-card {
+  width: 92vw;
+  height: 85vh;
+  height: 85dvh;
+  max-width: 1100px;
+  overflow: hidden;
+  transform: translate(calc(-50% + var(--x, 0px)), -50%) scale(var(--s, 1));
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s;
+  will-change: transform, opacity;
+}
+
+.stage.dragging .swipe-card { transition: none; }
+
+.swipe-card .card-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+.top-bar { height: 4rem; flex-shrink: 0; }
+
+.bg-body { background-color: var(--bs-body-bg) !important; }
