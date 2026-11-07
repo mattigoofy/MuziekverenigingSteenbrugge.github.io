@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <?!= include('Stylesheet'); ?>
+  </head>
+  <body>
+  <!-- Log in screen -->
+    <div id="login">
+        <a href="#" id="loginBackButton">Naar Log in</a>
+        <h1 id="loginTitle">Steenbrugge<br>Activiteiten<br>Log in</h1><br>
+
+        <label id="emailLabel">Email</label>
+        <input id="emailInput" type="email">
+        <label id="passwordLabel">Password</label>
+        <input id="passwordInput" type="password">
+        <label id="usernameLabel">Naam</label>
+        <input id="usernameInput" type="text">
+
+        <button id="inlogButton">Log in</button>
+        <a href="#" id="forgotPassword">Paswoord vergeten</a>
+        <a href="#" id="register">Registreren</a>
+    </div>
+    
+
+    <span id="loadingText">loading...</span>
+
+  <!-- Main screen -->
+    <div class="container" id="main">
+      <div id="logOut_email">
+        <button id="logOutButton">Log Out</button><br>
+        <span id="email">Emailaddress</span>
+      </div>
+
+      <div id="score_edit">
+        <button id="editButton">Wijzigen</button>
+        <span id="score">Aanwezig: /</span><br>
+      </div>
+      <label id="toonAllesLabel">Toon alles <input type="checkbox" id="toonAllesInput"></label>
+
+      <div id="breaksForMobile"><br></div>
+
+      <div class="header" id="mainTitle">
+          <h1 id="title">Activiteiten</h1>
+          <br><br>
+      </div><br>
+
+  <!-- Events -->
+      <div class="events" id="events">
+        <a class="event-title" style="visibility: hidden;"></a>
+        <span>Aanwezig</span>
+        <span>Waarschijnlijk<br>Aanwezig</span>
+        <span>Geen Idee</span>
+        <span>Waarschijnlijk<br>Afwezig</span>
+        <span>Afwezig</span>
+
+        <!-- Events will be dynamically added here -->
+      </div>
+    </div>
+    
+    <?!= include('JavaScript'); ?>
+  </body>
+</html>

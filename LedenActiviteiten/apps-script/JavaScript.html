@@ -1,0 +1,632 @@
+<script type="module">
+  /*
+    * Overview *
+    *----------*
+    *- firebase
+        - setup
+        - login
+        - forgot_password
+        - register
+        - email_send_function
+    *- logged_in
+    *- create_event
+    *- extra_functies
+    *- eventHandlers
+    *- main
+  */
+
+  ////////////////////////////////////////////////////////////////////////
+  // firebase                                                           //
+  ////////////////////////////////////////////////////////////////////////
+
+  //
+  // setup
+  //
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+      apiKey: "AIzaSyCiIYRu6jwvoZS3KRczNIuB7leNbfgZRZI",
+      authDomain: "aanwezigheden-steenbrugge.firebaseapp.com",
+      projectId: "aanwezigheden-steenbrugge",
+      storageBucket: "aanwezigheden-steenbrugge.appspot.com",
+      messagingSenderId: "794040098578",
+      appId: "1:794040098578:web:66973bf6682e9054081dcb",
+      measurementId: "G-87Q7NMTT04"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  // const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+
+
+
+  //
+  // login
+  //
+  document.getElementById("inlogButton").addEventListener('click', function() {
+    email = document.getElementById("emailInput").value;
+    let password = document.getElementById("passwordInput").value;
+
+    signInWithEmailAndPassword(auth, email, password).then(u => {
+      loggedIn();
+    })
+    .catch(error => {
+      switch (error.code) {
+        case 'auth/invalid-password':
+          alert(`Fout wachtwoord, probeer opnieuw.`);
+          break;
+        case 'auth/invalid-email':
+          alert(`Email adres ${email} is ongeldig.`);
+          break;
+        case 'auth/invalid-credential':
+          alert(`Als je nog geen account hebt, ga dan eens gaan praten met de secretaris.`);
+          break;
+        case 'auth/auth/user-not-found':
+          alert('Als je nog geen account hebt, ga dan eens gaan praten met de secretaris.');
+          break;
+        default:
+          console.log(error.message);
+          alert("Er ging iets fout, probeer opnieuw")
+          break;
+      }
+    });
+  });
+
+
+
+  //
+  // forgot_password
+  //
+  var send = false;
+  document.getElementById('forgotPassword').addEventListener('click', function(event) {
+    event.preventDefault();
+
+    if(!send){
+      document.getElementById("register").style.display = "none";
+      document.getElementById("passwordLabel").style.display = "none";
+      document.getElementById("passwordInput").style.display = "none";
+      document.getElementById("inlogButton").style.display = "none";
+      document.getElementById("loginBackButton").style.display = "block";
+      document.getElementById("forgotPassword").innerHTML = "Verzend email";
+      document.getElementById("loginTitle").innerHTML = "<br><br>Paswoord vergeten";
+      send = true;
+    }else{
+      var email = document.getElementById("emailInput").value;
+
+      if(email != ""){
+        alert('Reset password email send');
+        sendPasswordEmail(email);
+
+        document.getElementById("register").style.display = "block";
+        document.getElementById("passwordLabel").style.display = "block";
+        document.getElementById("passwordInput").style.display = "block";
+        document.getElementById("inlogButton").style.display = "block";
+        document.getElementById("loginBackButton").style.display = "none";
+        document.getElementById("forgotPassword").innerHTML = "Paswoord vergeten";
+        document.getElementById("loginTitle").innerHTML = "Steenbrugge<br>Activiteiten<br>Log in";
+        send = false;
+      } else {
+        alert("Geef een email adres in")
+      }
+    }
+  });
+
+
+
+  //
+  // register
+  //
+  var makeAccount = false;
+  document.getElementById("register").addEventListener('click', function(event) {
+    event.preventDefault();
+    if(!makeAccount){
+      document.getElementById("usernameLabel").style.display = "block";
+      document.getElementById("usernameInput").style.display = "block";
+      document.getElementById("loginBackButton").style.display = "block";
+      document.getElementById("passwordLabel").style.display = "none";
+      document.getElementById("passwordInput").style.display = "none";
+      document.getElementById("forgotPassword").style.display = "none";
+      document.getElementById("inlogButton").style.display = "none";
+      document.getElementById("register").innerHTML = "Account maken";
+      document.getElementById("loginTitle").innerHTML = "<br><br>Account aanmaken";
+      makeAccount = true;
+
+    } else {
+      email = document.getElementById("emailInput").value;
+      let password = Math.floor((Math.random() * 1000000) + 100000);
+      let username = document.getElementById("usernameInput").value;
+
+      createUserWithEmailAndPassword(auth, email, password).then(u => {})
+        .catch(error => {
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+            alert(`Email adres ${email} is al in gebruik.`);
+            break;
+            case 'auth/invalid-email':
+            alert(`Email adres ${email} is niet geldig.`);
+            break;
+            case 'auth/operation-not-allowed':
+            alert(`Er ging iets fout.`);
+            break;
+            case 'auth/weak-password':
+            alert('Password is niet sterk genoeg. Voeg extra karakters toe.');
+            break;
+            default:
+            console.log(error.message);
+            alert("Er ging iets fout, probeer opnieuw")
+            break;
+          }
+        });
+
+      auth.onAuthStateChanged(async function() {
+        if(auth.currentUser != null){  
+          google.script.run.notifyNewRegister(email, username);
+          // loggedIn();       
+            
+          alert("Account gemaakt, er is een mail verzonden om uw password aan te passen");
+          sendPasswordEmail(email);
+        }
+      })
+
+      document.getElementById("usernameLabel").style.display = "none";
+      document.getElementById("usernameInput").style.display = "none";
+      document.getElementById("loginBackButton").style.display = "none";
+      document.getElementById("passwordLabel").style.display = "block";
+      document.getElementById("passwordInput").style.display = "block";
+      document.getElementById("forgotPassword").style.display = "block";
+      document.getElementById("inlogButton").style.display = "block";
+      document.getElementById("register").innerHTML = "Registreren";
+      document.getElementById("loginTitle").innerHTML = "Steenbrugge<br>Activiteiten<br>Log in";
+      makeAccount = true;
+    }
+  })
+
+
+
+  //
+  // email_send_function
+  //
+  function sendPasswordEmail(email) {
+    sendPasswordResetEmail(auth, email)
+    .then(() => {
+      // Password reset email sent!
+    })
+    .catch((error) => {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+    });
+  }
+
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // logged_in                                                          //
+  ////////////////////////////////////////////////////////////////////////
+
+  // var userData;
+  // var disabledEvents;
+  // var allThedata;
+  function loggedIn() {
+    document.getElementById("main").style.display = "block";
+    document.getElementById("login").style.display = "none";    // weg met loginscherm
+    document.getElementById("loadingText").style.display = "block";    // kom met laden
+    localStorage.setItem("emailAanwezighedenFanfare", email);   // email lokaal opslaan
+
+    // Juiste titel zetten
+    google.script.run.withSuccessHandler(function(title) {
+      document.getElementById("title").innerHTML = title;
+    }).getTitle();
+
+    // email plaatsen
+    document.getElementById("email").innerHTML = email;
+
+    google.script.run.withSuccessHandler(function(data) {       // events halen uit spreadsheet
+      if(data.events.length == 0 && data.userData.length == 0){
+        document.getElementById("loadingText").style.display = "none";
+        alert("Dit email zit nog niet in de lijst.\n->Als dit een nieuw account is zal je meoeten wachten op de secretaris\n->als dit een oud account is heb je waarschijnlijk een fout email, gelieve in te loggen met het juiste email");
+      } else {
+        updateEvents(data);
+
+        // userData = data.userData;
+        // events = data.events;
+        // disabledEvents = data.disabledEvents;
+        // localStorage.setItem("eventsAanwezighedenSteenbrugge", JSON.stringify(data.events));
+        // localStorage.setItem("infoAanwezighedenSteenbrugge", JSON.stringify(data.info));
+        localStorage.setItem("dataAanwezighedenSteenbrugge", JSON.stringify(data));
+        document.getElementById("editButton").style.display = "block";
+        document.getElementById("toonAllesLabel").style.display = "flex";
+        document.getElementById("loadingText").style.display = "none";
+
+        if(data.readOnly){
+          document.getElementById("editButton").disabled = true;
+        }
+      }
+      // allThedata = data;
+    }).getSpreadsheetData(email);
+    updateScore(email);
+  }
+
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // create_event                                                       //
+  ////////////////////////////////////////////////////////////////////////
+
+  function createEvent(eventName, userValue, eventInfo) {
+
+    // create event for aanweigheden
+    const eventsContainer = document.querySelector('.events');
+    
+    const eventTitle = document.createElement('a');
+    eventTitle.className = 'event-title';
+    eventTitle.href = '#';
+    eventTitle.innerHTML = eventName;
+    eventTitle.addEventListener('click', (event) => {
+      event.preventDefault();
+      document.getElementById("main").style.display = "none";
+      document.getElementById("info_"+eventName).style.display = "grid";
+
+    });
+    eventsContainer.appendChild(eventTitle);
+
+
+    const options = ['X', 'X?', '?', 'O?', 'O'];
+    options.forEach(option => {
+      const radioGroup = document.createElement('div');
+      radioGroup.classList.add('radio-group');
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = `event${eventName}`;
+      radio.value = option;
+      if (option === userValue) {
+        radio.checked = true;
+      } else {
+        radio.disabled = true;
+      }
+      radio.addEventListener('change', function() {
+        eventName = eventName.replaceAll("<br>", "\n");
+        google.script.run.updateSpreadsheet(email, eventName, option);
+        updateScore(email);
+      });
+      radioGroup.appendChild(radio);
+      eventsContainer.appendChild(radioGroup);
+    });
+
+
+    // create event voor info
+    const event = document.createElement("div");
+    event.className = "container";
+    event.id = "info_" + eventName;
+    event.style.display = "none";
+
+    const homeButton = document.createElement("button");
+    homeButton.className = "homeButton";
+    homeButton.textContent = "HOME";
+    homeButton.addEventListener('click', function() {
+      document.getElementById("main").style.display = "grid";
+      document.getElementById("info_" + eventName).style.display = "none";
+    })
+
+    const nextButton = document.createElement("button");
+    nextButton.className = "nextButton";
+    nextButton.textContent = ">";
+    nextButton.id = "nextButton_" + eventName;
+    nextButton.addEventListener('click', function() { moveToNextPage("right"); });
+
+    const previousButton = document.createElement("button");
+    previousButton.className = "previousButton";
+    previousButton.textContent = "<";
+    previousButton.id = "previousButton_" + eventName;
+    previousButton.addEventListener('click', function() { moveToNextPage("left"); });
+
+    const header = document.createElement("div");
+    header.className = "header";
+
+    const title = document.createElement("h1");
+    title.innerHTML = eventName;
+
+    const information = document.createElement("span");
+    information.className = "infoEvent";
+    information.innerHTML = eventInfo;
+
+    header.appendChild(title);
+    header.appendChild(document.createElement("br"));
+    header.appendChild(document.createElement("br"));
+
+    event.appendChild(homeButton);
+    console.log(data)
+    if(data != null) {
+      if(data.events != null){
+        if(data.events.indexOf(eventName.replaceAll("<br>", "\n")) != data.events.length-1){
+          event.appendChild(nextButton);
+        }
+      }
+    }
+    event.appendChild(previousButton);
+    event.appendChild(header);
+    event.appendChild(information);
+
+    document.body.appendChild(event);
+
+  }
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // extra_functies                                                     //
+  ////////////////////////////////////////////////////////////////////////
+
+  //
+  // om naar volgende pagina te kunnen gaan
+  //
+  function moveToNextPage(direction){        
+    const containers = document.getElementsByClassName("container");
+    var current;
+    var next;
+    for(let i=0;i<containers.length; i++){
+      if(containers[i].style.display == "grid"){
+        current = containers[i];
+
+        if(direction == "left"){
+          next = containers[i-1];
+        } else if(direction == "right"){
+          next = containers[i+1];
+        }
+      }
+    }
+
+    if(next != undefined && current != undefined){
+      current.style.display = "none";
+      next.style.display = "grid";
+    }
+  }
+
+
+
+  //
+  //  update score
+  //
+  function updateScore(email) {
+    google.script.run.withSuccessHandler(function(data){
+      document.getElementById("score").innerHTML = "Aanwezig: " + data.score + "/" + data.total;  
+      document.getElementById("score").style.color = data.background;
+    }).getScore(email);        
+  }
+
+
+
+  //
+  //  update events
+  //
+  function updateEvents(data) {
+    // clear current events
+    var events = document.getElementsByClassName("event-title");
+    var length = events.length;
+    for(let i=1; i < length; i++){
+      events[1].remove();
+    }
+    events = document.getElementsByClassName("radio-group");
+    length = events.length;
+    for(let i=0; i < length; i++){
+      events[0].remove();
+    }
+
+    // clear events info
+    var containers = document.getElementsByClassName("container");
+    var currentlyWatching;
+    length = containers.length;
+    for(let i=1; i < length; i++){
+      if(containers[1].style.display == "grid"){
+        currentlyWatching = containers[1].id;
+      }
+      containers[1].remove();
+    }
+
+    // add new events
+    for (let i = 0; i < data.events.length; i++) {
+      if(!data.disabledEvents[i] || document.getElementById("toonAllesInput").checked) {
+        createEvent(data.events[i].replaceAll("\n","<br>"), data.userData[i], data.info[i].replaceAll("\n", "<br>"));
+      }
+
+      if(currentlyWatching != undefined){
+        if("info_" + data.events[i].replaceAll("\n","<br>") == currentlyWatching){
+          document.getElementById(currentlyWatching).style.display = "grid";
+        }
+      } else {
+        document.getElementById("main").style.display = "grid";
+      }
+    }
+  }
+
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // eventHandlers                                                      //
+  ////////////////////////////////////////////////////////////////////////
+
+  //
+  // loginBackButton
+  //
+  document.getElementById("loginBackButton").addEventListener('click', function(event) {
+    event.preventDefault();
+    document.getElementById("loginBackButton").style.display = "none";
+    document.getElementById("passwordLabel").style.display = "block";
+    document.getElementById("passwordInput").style.display = "block";
+    document.getElementById("usernameLabel").style.display = "none";
+    document.getElementById("usernameInput").style.display = "none";
+
+    document.getElementById("inlogButton").style.display = "block";
+    document.getElementById("forgotPassword").style.display = "block";
+    document.getElementById("register").style.display = "block";
+
+    document.getElementById("forgotPassword").innerHTML = "Paswoord vergeten";
+    document.getElementById("register").innerHTML = "Registreren";
+    document.getElementById("loginTitle").innerHTML = "Steenbrugge<br>Activiteiten<br>Log in";
+
+    send = false;
+    makeAccount = false;
+  })
+
+  //
+  // log out button event handler
+  //
+  document.getElementById("logOutButton").addEventListener('click', function() {
+    localStorage.removeItem("emailAanwezighedenFanfare");
+    localStorage.removeItem("eventsAanwezighedenSteenbrugge");
+    localStorage.removeItem("infoAanwezighedenSteenbrugge");
+    localStorage.removeItem("dataAanwezighedenSteenbrugge");
+    // window.location.reload();
+    // google.script.run.withSuccessHandler(function(url){
+    //   window.open(url, '_top');
+    // }).getURL();
+    // window.open('https://script.google.com/macros/s/AKfycbzWEhJKKjDVaCvN5nNBVmqHSx4fsk2ILXJzCGckIeSRZL4F1xj4Gm4iSkfLvmfCimE/exec', '_top')
+    // console.log(window.location.href)
+    // window.open(window. location. href, '_top');
+    window.open(url, '_top');
+  })
+
+  //
+  // om te kunnen swipen
+  //
+  var startX = null;
+  var startY = null;
+  window.addEventListener("touchstart",function(event){
+    if(event.touches.length === 1){
+      //just one finger touched
+      startX = event.touches.item(0).clientX;
+      startY = event.touches.item(0).clientY;
+    }else{
+      //a second finger hit the screen, abort the touch
+      startX = null;
+      startY = null;
+    }
+  });
+
+  window.addEventListener("touchend",function(event){
+    var offsetX = 100;//at least 100px are a swipe
+    var offsetY = 100;//at least 100px are a swipe
+    if(startX){
+      //the only finger that hit the screen left it
+      var endX = event.changedTouches.item(0).clientX;
+      var endY = event.changedTouches.item(0).clientY;
+
+      // console.log(startY - endY);
+      if(endX > startX + offsetX && Math.abs(startY - endY) < offsetY){
+        //a left -> right swipe
+        console.log("swiped left");
+        moveToNextPage("left");
+      }
+      if(endX < startX - offsetX && Math.abs(startY - endY) < offsetY){
+      //a right -> left swipe
+        console.log("swiped right")
+        moveToNextPage("right");
+      }
+    }
+  });
+
+
+
+  //
+  // keylistener arrows
+  //
+  document.addEventListener('keydown', function (e) {
+    if (e.code === "ArrowRight"){
+      moveToNextPage("right");
+    } else if (e.code === "ArrowLeft"){
+      moveToNextPage("left");
+    }
+  });
+
+
+
+  //
+  // toonAlles_checkbox
+  //
+  document.getElementById("toonAllesInput").addEventListener('change', function() {
+    updateEvents(data);
+  })
+
+
+
+  //
+  // Wijzig knop 
+  //
+  let bulletsEnabled = false;
+  document.getElementById('editButton').addEventListener('click', function() {
+    if(data.userData != undefined){
+        const radioButtons = document.querySelectorAll('input[type="radio"]');
+        var cntr = 0;
+        radioButtons.forEach(radio => {
+            if(!radio.checked && data.userData[Math.trunc(cntr/5)] != "-" && data.disabledEvents[Math.trunc(cntr/5)]){
+                radio.disabled = bulletsEnabled;
+            }
+
+            cntr++;
+        });
+
+        if(!bulletsEnabled){
+            document.getElementById('editButton').innerHTML = "Stop wijzigen"
+        } else {
+            document.getElementById('editButton').innerHTML = "Wijzigen"
+        }
+        bulletsEnabled = !bulletsEnabled;
+    }
+  });
+
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // main                                                               //
+  ////////////////////////////////////////////////////////////////////////
+  var url;
+
+  //
+  // checken als lokaal al eens is ingelogd
+  //
+  let email = localStorage.getItem("emailAanwezighedenFanfare");
+  if(email != null){
+    loggedIn();
+  }
+
+
+
+  //
+  // checken voor lokale events
+  //
+  // var events = JSON.parse(localStorage.getItem("eventsAanwezighedenSteenbrugge"));
+  // var info = JSON.parse(localStorage.getItem("infoAanwezighedenSteenbrugge"));
+  var data = JSON.parse(localStorage.getItem("dataAanwezighedenSteenbrugge"));
+  if(data != null && data != "null"){
+    // for(let i=0; i<events.length; i++){
+    //   createEvent(data.events[i].replaceAll("\n","<br>"), "", data.info[i].replaceAll("\n","<br>"));
+    // }
+    updateEvents(data);
+  }
+
+
+
+  // 
+  // URL ophalen
+  //
+  google.script.run.withSuccessHandler(function(currentUrl){
+    url = currentUrl;
+    document.getElementById("logOutButton").style.display = "inline";
+  }).getURL();
+</script>
