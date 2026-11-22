@@ -1,0 +1,322 @@
+openapi: 3.1.0
+info:
+  title: Muziekvereniging Steenbrugge API
+  version: 4.0.0
+  description: |
+    JSON API for the public activities page (`activiteiten/`) and the members page
+    (`leden-activiteiten/`): one Google Apps Script web app (`apps-script/`) on top of the spreadsheet.
+    The tab **Activiteiten** is the source; every column of the attendance sheet belongs to the
+    activity with the same title. The `id` is derived from that title (`concert-in-de-kerk`).
+    The members calendar is not updated through the API but by a trigger (`syncAgenda`).
+
+    **Apps Script quirks**
+    - Every response has HTTP status **200**. Whether it worked is in `ok`:
+      `{ "ok": true, "data": ... }` or `{ "ok": false, "error": { "code", "message" } }`.
+      Only the local server returns HTTP 500 (`SCRIPT_ERROR`) when the code fails outside `doGet`/`doPost`.
+    - Apps Script does not answer a CORS preflight. So send no custom headers
+      (no `Authorization`) and send a POST body as `text/plain` containing JSON.
+    - The path comes after `/exec`, e.g. `.../exec/me`. The production URL answers with a
+      302 redirect to `script.googleusercontent.com`; `fetch` and curl with `-L` follow it.
+
+    **Login**: pass the Firebase ID token of the logged-in user as query parameter `idToken`
+    (in the browser: `await auth.currentUser.getIdToken()`). The server verifies the token with
+    Google and uses the email address from it; sending an email address yourself is not possible.
+    On the local server with `--fake-auth`, `dev:<email>` counts as a token with a verified address
+    (e.g. `dev:piet@example.com`) and `dev-unverified:<email>` as one with an unverified address.
+
+    **Access**: `/me` and `/attendance` require a verified email address (otherwise `EMAIL_NOT_VERIFIED`)
+    that is on the member list (otherwise `NOT_A_MEMBER`). `/registrations` only requires a valid token.
+
+    **Language**: error messages are English and meant for developers; the pages show their own text
+    per error `code`. Content from the spreadsheet is Dutch; the optional English descriptions are in
+    `descriptionEn` and `infoEn` (empty string when not filled in, the page then falls back to Dutch).
+servers:
+  - url: https://script.google.com/macros/s/AKfycbxZnLV4jeG1e-124oRXeYH6EL5ugfMPsrg-ORNUR8l68OlA00lLd0YXKVnD9BtMGv23/exec
+    description: Production (Apps Script web app)
+  - url: http://localhost:8787/exec
+    description: Local (apps-script/local/server.mjs)
+tags:
+  - name: General
+  - name: Public
+  - name: Member
+paths:
+  /health:
+    get:
+      tags: [General]
+      operationId: getHealth
+      summary: Does the API work and can it read the spreadsheet
+      security: []
+      responses:
+        '200':
+          description: Envelope with the status. Possible error `INTERNAL`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/HealthResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+              example: { ok: true, data: { status: ok, title: Activiteiten 2026 } }
+  /public/activities:
+    get:
+      tags: [Public]
+      operationId: getPublicActivities
+      summary: Upcoming activities for the website
+      description: |
+        Rows of Activiteiten with **Op website** ticked whose end has not passed yet,
+        plus those without a date ("date to be announced"). Sorted by date, undated last.
+        No login; the response is cached for 10 minutes. Contains no member data.
+      security: []
+      responses:
+        '200':
+          description: Envelope with the list. Possible error `INTERNAL` (e.g. Activiteiten not set up).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PublicActivitiesResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+  /me:
+    get:
+      tags: [Member]
+      operationId: getMe
+      summary: Activities, answers and score of the logged-in user
+      description: |
+        The columns of the attendance sheet, each with the activity from Activiteiten with the same title.
+        Only columns whose activity has `Op LedenActiviteiten` ticked are included; a column without an
+        activity of that title is left out. As long as Activiteiten has no such column, all columns are
+        included. Sorted by date, undated last.
+      responses:
+        '200':
+          description: |
+            Envelope with the data. Possible errors: `UNAUTHENTICATED`, `EMAIL_NOT_VERIFIED`, `NOT_A_MEMBER`, `INTERNAL`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MeResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+  /attendance:
+    post:
+      tags: [Member]
+      operationId: postAttendance
+      summary: Save the answer for one activity
+      description: |
+        Refused (`FORBIDDEN`) when the member is read-only, the activity is closed
+        or the current answer is `-` (does not apply). An activity that is not in `/me`
+        (including one not ticked for the members page) gives `NOT_FOUND`.
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/AttendanceRequest'
+            example: '{"id": "concert-in-de-kerk", "answer": "X"}'
+      responses:
+        '200':
+          description: |
+            Envelope with the saved answer and the new score. Possible errors: `UNAUTHENTICATED`,
+            `EMAIL_NOT_VERIFIED`, `NOT_A_MEMBER`, `BAD_REQUEST`, `NOT_FOUND`, `FORBIDDEN`, `INTERNAL`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AttendanceResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+  /registrations:
+    post:
+      tags: [Member]
+      operationId: postRegistration
+      summary: Mail the secretary that a new account exists
+      description: |
+        Called right after creating a Firebase account, before the address is verified; this is the
+        only route that accepts an unverified address. The email address comes from the token.
+        At most one mail per address per 6 hours; after that the API returns `sent: false`.
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+            example: '{"name": "Piet Peeters"}'
+      responses:
+        '200':
+          description: Envelope. Possible errors `UNAUTHENTICATED`, `BAD_REQUEST`, `INTERNAL`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RegistrationResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+security:
+  - firebaseIdToken: []
+components:
+  securitySchemes:
+    firebaseIdToken:
+      type: apiKey
+      in: query
+      name: idToken
+      description: Firebase ID token (locally with --fake-auth also `dev:<email>` or `dev-unverified:<email>`)
+  schemas:
+    Answer:
+      type: string
+      enum: ['X', 'X?', '?', 'O?', 'O']
+      description: X = present, X? = probably present, ? = don't know, O? = probably absent, O = absent
+    Score:
+      type: object
+      additionalProperties: false
+      required: [score, total, background]
+      properties:
+        score:
+          type: [number, string]
+          description: Number of times present (value from the spreadsheet), or an empty string when the cell is empty
+          examples: [7]
+        total:
+          type: [number, string]
+          description: Total (value from the spreadsheet), or an empty string when the cell is empty
+          examples: [10]
+        background:
+          type: string
+          description: Background colour of the score cell, used as text colour
+          examples: ['#00ff00']
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, error]
+      properties:
+        ok: { type: boolean, const: false }
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [UNAUTHENTICATED, EMAIL_NOT_VERIFIED, NOT_A_MEMBER, FORBIDDEN, NOT_FOUND, BAD_REQUEST, INTERNAL, SCRIPT_ERROR]
+              description: '`SCRIPT_ERROR` only comes from the local server (HTTP 500), never from Apps Script'
+            message: { type: string, description: Explanation in English, meant for developers }
+      examples: [{ ok: false, error: { code: NOT_A_MEMBER, message: This email address is not on the member list } }]
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { type: boolean, const: true }
+        data:
+          type: object
+          additionalProperties: false
+          required: [status, title]
+          properties:
+            status: { type: string, const: ok }
+            title: { type: string, description: Name of the attendance sheet, examples: [Activiteiten 2026] }
+    Activity:
+      type: object
+      additionalProperties: false
+      required: [id, title, start, end, location, info, infoEn, answer, closed]
+      properties:
+        id:
+          type: string
+          description: 'Derived from the column title (lowercase, hyphens); "column-<nr>" when the title is empty'
+          examples: [concert-in-de-kerk]
+        title: { type: string, examples: [Concert in de kerk] }
+        start: { type: [string, 'null'], format: date-time, description: null = date to be announced }
+        end: { type: [string, 'null'], format: date-time, description: 'end from the sheet, or start + 2 hours' }
+        location: { type: string, examples: [Kerk Steenbrugge] }
+        info: { type: string, description: '`Beschrijving LedenActiviteiten` as html (text escaped)' }
+        infoEn:
+          type: string
+          description: '`Beschrijving LedenActiviteiten EN` as html; empty string when not filled in (use `info`)'
+        answer:
+          type: string
+          enum: ['X', 'X?', '?', 'O?', 'O', '', '-']
+          description: 'empty = not filled in yet, - = does not apply'
+        closed: { type: boolean, description: 'closed by the secretary (J row); can no longer be changed' }
+    Me:
+      type: object
+      additionalProperties: false
+      required: [email, title, activities, readOnly, score, calendarUrl]
+      properties:
+        email: { type: string, format: email, examples: [piet@example.com] }
+        title: { type: string, description: Name of the attendance sheet, examples: [Activiteiten 2026] }
+        activities:
+          type: array
+          items: { $ref: '#/components/schemas/Activity' }
+        readOnly: { type: boolean, description: true = the secretary disabled changes for this member }
+        score: { $ref: '#/components/schemas/Score' }
+        calendarUrl:
+          type: [string, 'null']
+          description: |
+            Secret iCal address of the members calendar: the `Agenda-link` setting in the `settings` tab,
+            falling back to the Script Property `AGENDA_ICAL_URL`; null when neither is set
+    MeResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { type: boolean, const: true }
+        data: { $ref: '#/components/schemas/Me' }
+    PublicActivity:
+      type: object
+      additionalProperties: false
+      required: [id, title, start, end, location, description, descriptionEn]
+      properties:
+        id: { type: string, description: Derived from the title, examples: [concert-in-de-kerk] }
+        title: { type: string, examples: [Concert in de kerk] }
+        start: { type: [string, 'null'], format: date-time, description: null = date to be announced }
+        end: { type: [string, 'null'], format: date-time }
+        location: { type: string, examples: [Kerk Steenbrugge] }
+        description: { type: string, description: '`Beschrijving website` as html (text escaped)' }
+        descriptionEn:
+          type: string
+          description: '`Beschrijving website EN` as html; empty string when not filled in (use `description`)'
+    PublicActivitiesResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { type: boolean, const: true }
+        data:
+          type: object
+          additionalProperties: false
+          required: [activities]
+          properties:
+            activities:
+              type: array
+              items: { $ref: '#/components/schemas/PublicActivity' }
+    AttendanceRequest:
+      type: object
+      additionalProperties: false
+      required: [id, answer]
+      properties:
+        id: { type: string, description: 'id of the activity as in /me', examples: [concert-in-de-kerk] }
+        answer: { $ref: '#/components/schemas/Answer' }
+    AttendanceResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { type: boolean, const: true }
+        data:
+          type: object
+          additionalProperties: false
+          required: [answer, score]
+          properties:
+            answer: { $ref: '#/components/schemas/Answer' }
+            score: { $ref: '#/components/schemas/Score' }
+    RegistrationRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100, examples: [Piet Peeters] }
+    RegistrationResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { type: boolean, const: true }
+        data:
+          type: object
+          additionalProperties: false
+          required: [sent]
+          properties:
+            sent: { type: boolean, description: false = a mail for this address was already sent in the last 6 hours }

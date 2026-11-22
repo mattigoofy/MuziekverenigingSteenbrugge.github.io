@@ -1,0 +1,12 @@
+{
+  "name": "steenbrugge-apps-script-local",
+  "private": true,
+  "description": "Local server and tests for the Apps Script backend; none of this goes to Apps Script",
+  "scripts": {
+    "start": "node local/server.mjs --fake-auth",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

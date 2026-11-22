@@ -1,2 +1,5 @@
 .env
 .clasp.json
+node_modules/
+# own spreadsheet export for local testing: contains member data
+apps-script/local/data/

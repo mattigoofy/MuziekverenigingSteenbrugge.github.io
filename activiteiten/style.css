@@ -1,0 +1,155 @@
+/* ===== Colours: matches ceciliasteenbrugge.be (white, Lato, blue #2F5596) ===== */
+:root {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --cell: rgba(47, 85, 150, 0.08);
+  --border: #e3e6eb;
+  --border-hover: rgba(47, 85, 150, 0.45);
+  --shadow: 0 1px 2px rgba(33, 33, 33, 0.06);
+  --title: #2f5596;
+  --accent: #2f5596;
+  --accent-hover: #264478;
+  --text: #212121;
+  --muted: rgba(0, 0, 0, 0.64);
+  --danger: #b42318;
+  --radius: 10px;
+  --font: Lato, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--accent-hover); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ===== Page ===== */
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.page-header { margin-bottom: 8px; }
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1 { margin: 0; color: var(--title); font-weight: 700; font-size: clamp(1.8rem, 1.3rem + 2vw, 2.4rem); line-height: 1.15; }
+
+.list { display: grid; gap: 12px; }
+
+.month-heading {
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===== Activity ===== */
+.activity {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s ease;
+}
+.activity:not(.skeleton):hover { border-color: var(--border-hover); }
+
+.date {
+  flex: 0 0 4.2rem;
+  align-self: flex-start;
+  display: grid;
+  justify-items: center;
+  padding: 8px 4px;
+  background: var(--cell);
+  border-radius: 8px;
+  line-height: 1.1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.date .weekday, .date .month { color: var(--muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.date .day { color: var(--accent); font-size: 1.8rem; font-weight: 700; }
+
+.body { flex: 1 1 auto; min-width: 0; display: grid; gap: 6px; align-content: start; justify-items: start; }
+.title { margin: 0; color: var(--title); font-size: 1.15rem; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+.meta { margin: 0; color: var(--muted); font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.location { color: inherit; display: inline-flex; align-items: center; gap: 4px; }
+.description { overflow-wrap: anywhere; }
+.description:empty { display: none; }
+.add-to-calendar { display: inline-flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.add-to-calendar:hover { text-decoration: underline; }
+
+/* ===== Loading, empty, error ===== */
+.skeleton { height: 104px; background: var(--cell); border-color: transparent; box-shadow: none; opacity: 0.6; animation: pulse 1.2s ease-in-out infinite alternate; }
+@keyframes pulse { to { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+.message { margin: 16px 0 0; color: var(--muted); }
+.message.error { color: var(--danger); }
+.retry {
+  margin-left: 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.more { margin: 16px 0 0; text-align: center; }
+
+/* ===== Embedded (?embed=1): no header, no own background, no margins =====
+   color-scheme normal: otherwise the browser draws an opaque background behind the iframe */
+:root.embed { color-scheme: normal; }
+.embed body { background: transparent; }
+.embed .page { max-width: none; padding: 2px 2px 4px; }
+.embed .page-header { display: none; }
+.embed .month-heading:first-child { margin-top: 0; }
+
+@media (max-width: 420px) {
+  .activity { gap: 12px; padding: 12px; }
+  .date { flex-basis: 3.6rem; }
+  .date .day { font-size: 1.5rem; }
+}
+
+/* ===== Debug (?debug=1) ===== */
+.debug body { padding-bottom: 5rem; }
+#debugPanel {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #3b0d0d;
+  border-top: 1px solid #c33;
+  color: #fff;
+  font-size: 0.85rem;
+}
+#debugPanel input, #debugPanel select, #debugPanel button { font: inherit; padding: 4px 8px; border-radius: 4px; border: 1px solid #777; }
+#debugPanel input { flex: 1 1 14rem; min-width: 0; }
+#debugPanel button { background: #ffc107; color: #1b1300; border: 0; cursor: pointer; }
