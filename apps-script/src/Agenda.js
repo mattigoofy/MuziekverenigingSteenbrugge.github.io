@@ -1,5 +1,5 @@
 //
-// members agenda, menu and triggers
+// members agenda and triggers
 //
 // the spreadsheet is the memory: per activity (row) it holds the Agenda-ID of the event this script created
 // and a fingerprint of title, time, location and description at the last sync
@@ -15,7 +15,7 @@ const AGENDA_STATUS = {
 };
 
 //
-// sync the agenda with the Activiteiten tab (every hour via trigger, or via the menu)
+// sync the agenda with the Activiteiten tab (every hour via trigger, or by hand from the editor)
 // every activity with a date goes into the agenda
 //
 function syncAgenda() {
@@ -113,23 +113,15 @@ function onActivitiesEdit(e) {
   });
 }
 
-function showMenu() {
-  SpreadsheetApp.getUi().createMenu('Ledenpagina')
-    .addItem('Agenda nu bijwerken', 'syncAgenda')
-    .addItem('Opstellingen bijwerken', 'updateOrchestraLinks')
-    .addToUi();
-}
-
 //
-// run once from the editor: sync every hour, status on every change, menu on open
+// run once from the editor: sync every hour, status on every change
 // replaces its own triggers, so running it again never makes doubles
 //
 function installAgendaTriggers() {
-  // also the old Dutch names, so triggers from an earlier version are cleaned up
+  // also the old names and the removed menu (showMenu), so triggers from an earlier version are cleaned up
   ScriptApp.getProjectTriggers()
     .filter(trigger => ['syncAgenda', 'onActivitiesEdit', 'showMenu', 'onActiviteitenEdit', 'toonMenu'].indexOf(trigger.getHandlerFunction()) !== -1)
     .forEach(trigger => ScriptApp.deleteTrigger(trigger));
   ScriptApp.newTrigger('syncAgenda').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('onActivitiesEdit').forSpreadsheet(setting.ss).onEdit().create();
-  ScriptApp.newTrigger('showMenu').forSpreadsheet(setting.ss).onOpen().create();
 }
