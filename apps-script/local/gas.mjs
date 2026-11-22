@@ -141,6 +141,16 @@ class Range {
     return this;
   }
 
+  setRichTextValue(rich) {
+    this.sheet.cells.set(this.row + ',' + this.col, { ...this.sheet.cell(this.row, this.col), value: rich.text, rich: [{ text: rich.text, link: rich.link }] });
+    return this;
+  }
+
+  setRichTextValues(values) {
+    values.forEach((row, r) => row.forEach((rich, c) => new Range(this.sheet, this.row + r, this.col + c, 1, 1).setRichTextValue(rich)));
+    return this;
+  }
+
   // rich text: cel.rich = [{ text, bold, italic, underline, color, link }, ...]
   getRichTextValues() {
     return this.map((r, c) => {
@@ -259,6 +269,11 @@ export function createBackend({ spreadsheet, properties = {}, fakeAuth = false, 
     SpreadsheetApp: {
       openById: () => spreadsheet,
       getActiveSpreadsheet: () => spreadsheet,
+      newRichTextValue() {
+        const rich = {};
+        const builder = { setText: text => (rich.text = text, builder), setLinkUrl: link => (rich.link = link, builder), build: () => rich };
+        return builder;
+      },
       flush: () => {}
     },
     CalendarApp: {

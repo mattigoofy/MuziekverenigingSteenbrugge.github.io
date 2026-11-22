@@ -116,6 +116,7 @@ function onActivitiesEdit(e) {
 function showMenu() {
   SpreadsheetApp.getUi().createMenu('Ledenpagina')
     .addItem('Agenda nu bijwerken', 'syncAgenda')
+    .addItem('Opstellingen bijwerken', 'updateOrchestraLinks')
     .addToUi();
 }
 
