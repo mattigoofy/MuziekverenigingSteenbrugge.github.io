@@ -149,7 +149,7 @@ test('GET /me: attendance sheet columns linked by title, by date', () => {
   const repetitie = find(me, 'repetitie');
   assert.deepEqual(repetitie, {
     id: 'repetitie', title: 'Repetitie', start: day(-10, 20).toISOString(), end: day(-10, 22).toISOString(),
-    location: 'Repetitielokaal', locationUrl: '', info: repetitie.info, infoEn: '<span style="">Meet 30 minutes early.</span>', answer: 'X', closed: true
+    location: 'Repetitielokaal', locationUrl: '', info: repetitie.info, infoEn: '<span style="">Meet 30 minutes early.</span>', answer: 'X', closed: true, agendaUrl: ''
   });
   assert.match(repetitie.info, /<span style="font-weight: 900; ">uniform<\/span>/);
   assert.match(repetitie.info, /<a href="https:\/\/example.com\/partituren">/);
@@ -438,3 +438,12 @@ function column(n) {
   for (; n > 0; n = Math.floor((n - 1) / 26)) letters = String.fromCharCode(65 + (n - 1) % 26) + letters;
   return letters;
 }
+
+test('/me: link to the agenda event once the activity has an Agenda-ID', () => {
+  const { as, activitiesSheet } = setup();
+  activitiesSheet.set('I' + rowOf('Concert in de kerk'), 'abc123@google.com');
+  const concert = find(as('piet@example.com').get('me').data, 'concert-in-de-kerk');
+  const eid = new URL(concert.agendaUrl).searchParams.get('eid');
+  assert.equal(Buffer.from(eid, 'base64').toString(), 'abc123 leden@group.calendar.google.com');
+  assert.equal(find(as('piet@example.com').get('me').data, 'kerstconcert').agendaUrl, '');
+});

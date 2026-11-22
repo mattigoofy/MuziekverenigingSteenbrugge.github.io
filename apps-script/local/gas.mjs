@@ -301,6 +301,7 @@ export function createBackend({ spreadsheet, properties = {}, fakeAuth = false, 
     Utilities: {
       DigestAlgorithm: { SHA_256: 'sha256', MD5: 'md5' },
       computeDigest: (algorithm, text) => [...crypto.createHash(algorithm).update(String(text)).digest()].map(b => (b << 24) >> 24),
+      base64Encode: text => Buffer.from(String(text)).toString('base64'),
       base64EncodeWebSafe: bytes => Buffer.from(bytes.map(b => b & 255)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
     },
     UrlFetchApp: {

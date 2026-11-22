@@ -341,7 +341,7 @@ $('editButton').addEventListener('click', async () => {
 
 $('calendarCopy').addEventListener('click', () => {
   navigator.clipboard.writeText(data.calendarUrl)
-    .then(() => { $('calendarCopy').textContent = t('calendarCopied'); })
+    .then(() => { $('calendarCopy').innerHTML = '<i class="bi bi-check-lg"></i>'; })
     .catch(() => prompt(t('calendarCopyPrompt'), data.calendarUrl));
 });
 
@@ -392,9 +392,15 @@ function showData() {
   if (data.email) $('email').textContent = data.email;
   $('editButton').classList.toggle('btn-secondary', !!data.readOnly);
   $('editButton').classList.toggle('btn-warning', !data.readOnly);
-  // webcal: subscribes immediately on iPhone and Mac; elsewhere the link is pasted into Google Calendar (Add > From URL)
+  // Apple (iPhone, iPad, Mac): webcal: subscribes in Calendar right away; elsewhere webcal: does nothing,
+  // so open Google Calendar with "add this calendar?" (the calendar is public, any Google account works)
   $('calendarRow').classList.toggle('d-none', !data.calendarUrl);
-  if (data.calendarUrl) $('calendarLink').href = data.calendarUrl.replace(/^https?:/, 'webcal:');
+  if (data.calendarUrl) {
+    const webcal = data.calendarUrl.replace(/^https?:/, 'webcal:');
+    const apple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+    $('calendarLink').href = apple ? webcal : 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(webcal);
+    $('calendarLink').target = apple ? '' : '_blank';
+  }
   if (!editing) {
     updateCount();
     renderEvents();
@@ -425,7 +431,7 @@ function buildCards() {
         <div class="d-flex align-items-center gap-2 h-100">
           <div class="top-side"><button class="btn btn-warning btn-sm" data-home data-i18n-aria-label="home" data-i18n-title="home"><i class="bi bi-house-fill"></i></button></div>
           <h4 class="top-title m-0 text-warning-emphasis fw-bold" data-name></h4>
-          <div class="top-side"></div>
+          <div class="top-side text-end"><a class="btn btn-warning btn-sm d-none" data-agenda target="_blank" rel="noopener" data-i18n-aria-label="openInCalendar" data-i18n-title="openInCalendar"><i class="bi bi-calendar-event"></i></a></div>
         </div>
       </div>
       <div class="card-body overflow-auto">
@@ -445,6 +451,12 @@ function buildCards() {
       place.innerHTML = '<i class="bi bi-geo-alt"></i> ';
       place.append(activity.location);
       card.querySelector('[data-date]').append(' · ', place);
+    }
+    if (activity.agendaUrl) {
+      // the event in the members calendar, as an icon top right
+      const agenda = card.querySelector('[data-agenda]');
+      agenda.href = activity.agendaUrl;
+      agenda.classList.remove('d-none');
     }
     translatePage(card);
     card.querySelector('[data-info]').innerHTML = infoOf(activity) || t('noInfo');

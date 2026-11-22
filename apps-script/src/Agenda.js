@@ -97,6 +97,16 @@ function syncAgenda() {
 }
 
 //
+// link that opens the event in Google Calendar; only works for people the agenda is shared with
+// eid = base64 of "<event id without @google.com> <calendar id>"
+//
+function agendaEventUrl(agendaId, calendarId) {
+  if (!agendaId || !calendarId) return '';
+  const eid = Utilities.base64Encode(String(agendaId).replace(/@google\.com$/, '') + ' ' + calendarId).replace(/=+$/, '');
+  return 'https://www.google.com/calendar/event?eid=' + eid;
+}
+
+//
 // installable trigger on every change in Activiteiten: show what the next sync will do
 //
 function onActivitiesEdit(e) {

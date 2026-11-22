@@ -211,7 +211,7 @@ components:
     Activity:
       type: object
       additionalProperties: false
-      required: [id, title, start, end, location, info, infoEn, answer, closed]
+      required: [id, title, start, end, location, info, infoEn, answer, closed, agendaUrl]
       properties:
         id:
           type: string
@@ -230,6 +230,9 @@ components:
           type: string
           enum: ['X', 'X?', '?', 'O?', 'O', '', '-']
           description: 'empty = not filled in yet, - = does not apply'
+        agendaUrl:
+          type: string
+          description: 'Opens the event in Google Calendar (only for people the members calendar is shared with); empty = not in the agenda yet'
         closed: { type: boolean, description: 'closed by the secretary (J row); can no longer be changed' }
     Me:
       type: object

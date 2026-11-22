@@ -155,6 +155,7 @@ function getMe(user) {
   const row = requireMemberRow(user.email);
   const count = setting.endHeaderColRel;
   const answers = count ? aanwezighedenSheet.getRange(row, setting.startHeaderCol, 1, count).getValues()[0] : [];
+  const calendarId = getSetting('Agenda-ID', 'CALENDAR_ID');
 
   const activities = readEventColumns(readActivities())
     .map(column => {
@@ -169,7 +170,8 @@ function getMe(user) {
         info: activity ? activity.descriptionMembers : '',
         infoEn: activity ? activity.descriptionMembersEn : '',
         answer: String(answers[column.column - setting.startHeaderCol]).toUpperCase(),
-        closed: column.closed
+        closed: column.closed,
+        agendaUrl: activity ? agendaEventUrl(activity.agendaId, calendarId) : ''
       };
     })
     .sort((a, b) => compareByStart({ start: a.start && new Date(a.start) }, { start: b.start && new Date(b.start) }));
