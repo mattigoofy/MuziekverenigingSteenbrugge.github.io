@@ -32,7 +32,7 @@ const INFO = [
 
 export const ACTIVITIES = [
   { title: 'Repetitie', start: day(-10, 20), end: '22:00', location: 'Repetitielokaal', website: false, leden: true, infoEn: 'Meet 30 minutes early.' },
-  { title: 'Concert in de kerk', start: day(10, 19, 30), end: '21:30', location: 'Kerk Steenbrugge', website: true, leden: true, web: 'Gratis toegang, vrije bijdrage.', webEn: 'Free entry, donations welcome.' },
+  { title: 'Concert in de kerk', start: day(10, 19, 30), end: '21:30', location: 'Kerk Steenbrugge', locationLink: 'https://maps.app.goo.gl/kerkSteenbrugge', website: true, leden: true, web: 'Gratis toegang, vrije bijdrage.', webEn: 'Free entry, donations welcome.' },
   { title: 'Kerstconcert', start: day(40, 19, 30), end: '', location: 'Kerk Steenbrugge', website: true, leden: true, web: 'Iedereen welkom.' },
   { title: 'Nieuwjaarsreceptie', start: day(60, 11), end: '13:00', location: 'Gemeentehuis', website: true, leden: true, web: 'Korte set, daarna receptie.' },
   { title: 'Etentje', start: day(20, 19), end: '23:30', location: 'Feestzaal', website: false, leden: true },
@@ -85,7 +85,7 @@ export function createFixture({ extraEmails = [] } = {}) {
   ACTIVITIES.forEach((a, i) => {
     const row = ACTIVITY_HEADER_ROW + 1 + i;
     activities.set('A' + row, a.title).set('B' + row, a.start).set('C' + row, a.end)
-      .set('D' + row, a.location).set('E' + row, a.website).set('F' + row, a.leden)
+      .set('D' + row, a.location, a.locationLink ? { rich: [{ text: a.location, link: a.locationLink }] } : {}).set('E' + row, a.website).set('F' + row, a.leden)
       .set('G' + row, a.web || '').set('H' + row, a.leden ? 'Info' : '', a.leden ? { rich: INFO } : {})
       .set('L' + row, a.webEn || '').set('M' + row, a.infoEn || '');
   });

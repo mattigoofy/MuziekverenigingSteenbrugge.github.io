@@ -94,7 +94,8 @@ function card(activity) {
 
   if (activity.location) {
     field('location-text').textContent = activity.location;
-    field('location').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(activity.location);
+    // the link on the location cell if there is one, otherwise a Google Maps search for the text
+    field('location').href = activity.locationUrl || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(activity.location);
   } else {
     field('location').remove();
   }

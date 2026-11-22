@@ -139,6 +139,7 @@ function getPublicActivities() {
         start: a.start ? a.start.toISOString() : null,
         end: a.end ? a.end.toISOString() : null,
         location: a.location,
+        locationUrl: a.locationUrl,
         description: a.descriptionWebsite,
         descriptionEn: a.descriptionWebsiteEn
       }))
@@ -164,6 +165,7 @@ function getMe(user) {
         start: activity && activity.start ? activity.start.toISOString() : null,
         end: activity && activity.end ? activity.end.toISOString() : null,
         location: activity ? activity.location : '',
+        locationUrl: activity ? activity.locationUrl : '',
         info: activity ? activity.descriptionMembers : '',
         infoEn: activity ? activity.descriptionMembersEn : '',
         answer: String(answers[column.column - setting.startHeaderCol]).toUpperCase(),

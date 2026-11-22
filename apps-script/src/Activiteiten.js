@@ -102,6 +102,12 @@ function readActivities() {
   const membersHtml = richColumn(columns.descriptionMembers);
   const websiteEnHtml = richColumn(columns.descriptionWebsiteEn);
   const membersEnHtml = richColumn(columns.descriptionMembersEn);
+  // link on the location text (Ctrl+K in Sheets), e.g. an exact Google Maps link; only http(s)
+  const locationUrls = columns.location ? sheet.getRange(firstRow, columns.location, rows, 1).getRichTextValues().map(cell => {
+    const run = cell[0] ? cell[0].getRuns().find(r => r.getLinkUrl()) : null;
+    const url = run ? String(run.getLinkUrl()).trim() : '';
+    return /^https?:\/\//i.test(url) ? url : '';
+  }) : [];
   const cell = (row, key) => columns[key] ? row[columns[key] - 1] : '';
 
   const activities = values.map((row, i) => {
@@ -114,6 +120,7 @@ function readActivities() {
       start: start,
       end: activityEnd(start, cell(row, 'end'), columns.end ? display[i][columns.end - 1] : ''),
       location: String(cell(row, 'location')).trim(),
+      locationUrl: locationUrls[i] || '',
       website: isChecked(cell(row, 'website')),
       members: isChecked(cell(row, 'members')),
       descriptionWebsite: websiteHtml[i] || '',

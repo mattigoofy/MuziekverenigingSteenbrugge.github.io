@@ -221,6 +221,7 @@ components:
         start: { type: [string, 'null'], format: date-time, description: null = date to be announced }
         end: { type: [string, 'null'], format: date-time, description: 'end from the sheet, or start + 2 hours' }
         location: { type: string, examples: [Kerk Steenbrugge] }
+        locationUrl: { type: string, description: 'Link on the location cell (http/https), e.g. an exact Google Maps link; empty = none', examples: ['https://maps.app.goo.gl/kerkSteenbrugge'] }
         info: { type: string, description: '`Beschrijving LedenActiviteiten` as html (text escaped)' }
         infoEn:
           type: string
@@ -264,6 +265,7 @@ components:
         start: { type: [string, 'null'], format: date-time, description: null = date to be announced }
         end: { type: [string, 'null'], format: date-time }
         location: { type: string, examples: [Kerk Steenbrugge] }
+        locationUrl: { type: string, description: 'Link on the location cell (http/https), e.g. an exact Google Maps link; empty = none', examples: ['https://maps.app.goo.gl/kerkSteenbrugge'] }
         description: { type: string, description: '`Beschrijving website` as html (text escaped)' }
         descriptionEn:
           type: string

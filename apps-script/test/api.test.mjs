@@ -108,7 +108,7 @@ test('GET /public/activities: only Op website, upcoming or without date, sorted'
   assert.deepEqual(ids(list), ['concert-in-de-kerk', 'kerstconcert', 'nieuwjaarsreceptie', 'lenteconcert']);
 
   const concert = list[0];
-  assert.deepEqual(Object.keys(concert).sort(), ['description', 'descriptionEn', 'end', 'id', 'location', 'start', 'title']);
+  assert.deepEqual(Object.keys(concert).sort(), ['description', 'descriptionEn', 'end', 'id', 'location', 'locationUrl', 'start', 'title']);
   assert.equal(concert.title, 'Concert in de kerk');
   assert.equal(concert.start, day(10, 19, 30).toISOString());
   assert.equal(concert.end, day(10, 21, 30).toISOString(), 'end "21:30" on the day of the start');
@@ -149,7 +149,7 @@ test('GET /me: attendance sheet columns linked by title, by date', () => {
   const repetitie = find(me, 'repetitie');
   assert.deepEqual(repetitie, {
     id: 'repetitie', title: 'Repetitie', start: day(-10, 20).toISOString(), end: day(-10, 22).toISOString(),
-    location: 'Repetitielokaal', info: repetitie.info, infoEn: '<span style="">Meet 30 minutes early.</span>', answer: 'X', closed: true
+    location: 'Repetitielokaal', locationUrl: '', info: repetitie.info, infoEn: '<span style="">Meet 30 minutes early.</span>', answer: 'X', closed: true
   });
   assert.match(repetitie.info, /<span style="font-weight: 900; ">uniform<\/span>/);
   assert.match(repetitie.info, /<a href="https:\/\/example.com\/partituren">/);
@@ -242,6 +242,20 @@ test('POST /registrations mails the secretariat, at most once per 6 hours', () =
   assert.equal(backend.outbox[0].to, 'secretariaat@example.com');
   assert.match(backend.outbox[0].body, /Nieuw Lid heeft een nieuw account gemaakt/);
   assert.equal(errorCode(nieuw.post('registrations', { name: '  ' })), 'BAD_REQUEST');
+});
+
+test('location: link on the cell is passed on (only http/https), otherwise empty', () => {
+  const { backend, as, activitiesSheet } = setup();
+  const pub = backend.request('GET', 'public/activities').body.data.activities;
+  assert.equal(pub.find(a => a.id === 'concert-in-de-kerk').locationUrl, 'https://maps.app.goo.gl/kerkSteenbrugge');
+  assert.equal(pub.find(a => a.id === 'kerstconcert').locationUrl, '');
+  assert.equal(find(as('piet@example.com').get('me').data, 'concert-in-de-kerk').locationUrl, 'https://maps.app.goo.gl/kerkSteenbrugge');
+
+  const row = rowOf('Kerstconcert');
+  activitiesSheet.set('D' + row, 'Kerk', { rich: [{ text: 'Kerk', link: 'javascript:alert(1)' }] });
+  backend.cache.clear();
+  const again = backend.request('GET', 'public/activities').body.data.activities;
+  assert.equal(again.find(a => a.id === 'kerstconcert').locationUrl, '');
 });
 
 test('html in a cell is escaped', () => {

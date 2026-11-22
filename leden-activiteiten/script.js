@@ -434,7 +434,18 @@ function buildCards() {
       </div>`;
     card.querySelector('[data-name]').textContent = name;
     card.querySelector('[data-name]').title = name;
-    card.querySelector('[data-date]').textContent = formatWhen(activity) + (activity.location ? ' · ' + activity.location : '');
+    card.querySelector('[data-date]').textContent = formatWhen(activity);
+    if (activity.location) {
+      // the link on the location cell if there is one, otherwise a Google Maps search for the text
+      const place = document.createElement('a');
+      place.className = 'text-warning-emphasis';
+      place.href = activity.locationUrl || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(activity.location);
+      place.target = '_blank';
+      place.rel = 'noopener';
+      place.innerHTML = '<i class="bi bi-geo-alt"></i> ';
+      place.append(activity.location);
+      card.querySelector('[data-date]').append(' · ', place);
+    }
     translatePage(card);
     card.querySelector('[data-info]').innerHTML = infoOf(activity) || t('noInfo');
     card.querySelector('[data-home]').addEventListener('click', () => go(0));
