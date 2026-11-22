@@ -1,7 +1,7 @@
 // folder that contains sw.js: /MuziekverenigingSteenbrugge.github.io/leden-activiteiten online, /leden-activiteiten locally
 var GHPATH = self.location.pathname.replace(/\/sw\.js$/, '');
 var APP_PREFIX = 'gppwa_';
-var VERSION = 'version_005';
+var VERSION = 'version_006';
 var URLS = [
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
