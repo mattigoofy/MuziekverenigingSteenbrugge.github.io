@@ -203,6 +203,13 @@ function postAttendance(user, body) {
 
   cell.setValue(answer);
   SpreadsheetApp.flush();
+  // changes by a script do not fire the edit trigger: refresh the orchestra layout link of this column here
+  try {
+    updateOrchestraLinks(column.column, column.column);
+  }
+  catch (err) {
+    console.warn('Orchestra layout not updated: ' + err.message);
+  }
   return { answer: answer, score: getScore(row) };
 }
 
