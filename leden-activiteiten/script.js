@@ -17,6 +17,10 @@ const firebaseConfig = {
 
 // production backend (Apps Script web app); locally with ?debug=1 you can pick another one at the bottom, e.g. the local server
 const PRODUCTION_API = "https://script.google.com/macros/s/AKfycbxZnLV4jeG1e-124oRXeYH6EL5ugfMPsrg-ORNUR8l68OlA00lLd0YXKVnD9BtMGv23/exec";
+// test copy of the backend: used automatically when the pages run on the fork (mattigoofy.github.io)
+const TEST_API = "https://script.google.com/macros/s/AKfycby-BkqM8BNJ4vHT--4Ahf3It21iqQq2QSkK9RS6spYVneYqjHce_MrqTLwLdIKhiX4/exec";
+const TEST_HOSTS = ['mattigoofy.github.io'];
+const DEFAULT_API = TEST_HOSTS.includes(location.hostname) ? TEST_API : PRODUCTION_API;
 // the debug bar (pick another backend) only exists locally: online a link with ?debug=1 does nothing
 const IS_LOCAL = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const DEBUG = IS_LOCAL && new URLSearchParams(location.search).get('debug') === '1';
@@ -38,7 +42,7 @@ function storageSet(key, value) {
   } catch (e) {}
 }
 
-const apiUrl = (DEBUG && storageGet(API_KEY)) || PRODUCTION_API;
+const apiUrl = (DEBUG && storageGet(API_KEY)) || DEFAULT_API;
 
 translatePage();
 
@@ -561,6 +565,7 @@ if (data) {
 if (DEBUG) {
   const presets = [
     ['Production', PRODUCTION_API],
+    ['Test (copy)', TEST_API],
     ['Local (localhost:8787)', 'http://localhost:8787/exec'],
   ];
 
@@ -591,7 +596,7 @@ if (DEBUG) {
   // other backend = other data: clear the cache and reload
   $('debugApiSave').addEventListener('click', () => {
     const url = input.value.trim();
-    storageSet(API_KEY, !url || url === PRODUCTION_API ? null : url);
+    storageSet(API_KEY, !url || url === DEFAULT_API ? null : url);
     storageSet(DATA_KEY, null);
     location.reload();
   });
