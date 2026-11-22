@@ -11,11 +11,7 @@
 import { t, lang, locale, translatePage } from './i18n.js';
 
 // production backend (Apps Script web app)
-const PRODUCTION_API = "https://script.google.com/macros/s/AKfycbxZnLV4jeG1e-124oRXeYH6EL5ugfMPsrg-ORNUR8l68OlA00lLd0YXKVnD9BtMGv23/exec";
-// test copy of the backend: used automatically when the pages run on the fork (mattigoofy.github.io)
-const TEST_API = "https://script.google.com/macros/s/AKfycby-BkqM8BNJ4vHT--4Ahf3It21iqQq2QSkK9RS6spYVneYqjHce_MrqTLwLdIKhiX4/exec";
-const TEST_HOSTS = ['mattigoofy.github.io'];
-const DEFAULT_API = TEST_HOSTS.includes(location.hostname) ? TEST_API : PRODUCTION_API;
+const PRODUCTION_API = "https://script.google.com/macros/s/AKfycby-BkqM8BNJ4vHT--4Ahf3It21iqQq2QSkK9RS6spYVneYqjHce_MrqTLwLdIKhiX4/exec";
 // same key as the members page: one debug choice applies to both pages
 const API_KEY = 'apiUrlAanwezighedenSteenbrugge';
 
@@ -37,7 +33,7 @@ function storageSet(key, value) {
   } catch (e) {}
 }
 
-const apiUrl = (DEBUG && storageGet(API_KEY)) || DEFAULT_API;
+const apiUrl = (DEBUG && storageGet(API_KEY)) || PRODUCTION_API;
 const $ = (id) => document.getElementById(id);
 
 document.documentElement.classList.toggle('embed', EMBED);
@@ -195,7 +191,6 @@ load();
 if (DEBUG) {
   const presets = [
     ['Production', PRODUCTION_API],
-    ['Test (copy)', TEST_API],
     ['Local (localhost:8787)', 'http://localhost:8787/exec'],
   ];
 
@@ -219,7 +214,7 @@ if (DEBUG) {
   });
   $('debugApiSave').addEventListener('click', () => {
     const url = input.value.trim();
-    storageSet(API_KEY, !url || url === DEFAULT_API ? null : url);
+    storageSet(API_KEY, !url || url === PRODUCTION_API ? null : url);
     location.reload();
   });
 }
