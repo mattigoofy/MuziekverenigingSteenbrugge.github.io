@@ -59,7 +59,8 @@ class ApiError extends Error {
 
 async function api(method, path, body) {
   if (!auth.currentUser) throw new ApiError('UNAUTHENTICATED', 'not logged in');
-  const url = new URL(apiUrl.replace(/\/+$/, '') + '/' + path);
+  const url = new URL(apiUrl.replace(/\/+$/, ''));
+  url.searchParams.set('path', path);
   url.searchParams.set('idToken', await auth.currentUser.getIdToken());
 
   let response;
@@ -599,7 +600,7 @@ if (DEBUG) {
   $('debugApiTest').addEventListener('click', async () => {
     $('debugApiResult').textContent = '...';
     try {
-      const json = await (await fetch(input.value.trim().replace(/\/+$/, '') + '/health')).json();
+      const json = await (await fetch(input.value.trim().replace(/\/+$/, '') + '?path=health')).json();
       $('debugApiResult').textContent = json.ok ? 'OK: ' + json.data.title : 'Error: ' + json.error.code;
     } catch (e) {
       $('debugApiResult').textContent = 'Not reachable';

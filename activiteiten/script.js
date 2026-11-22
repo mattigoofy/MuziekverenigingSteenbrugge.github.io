@@ -160,7 +160,7 @@ function render(activities) {
 async function load() {
   $('list').setAttribute('aria-busy', 'true');
   try {
-    const json = await (await fetch(apiUrl.replace(/\/+$/, '') + '/public/activities')).json();
+    const json = await (await fetch(apiUrl.replace(/\/+$/, '') + '?path=public/activities')).json();
     if (!json.ok) throw new Error(json.error.message);
     render(json.data.activities);
   } catch (err) {

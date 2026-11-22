@@ -39,7 +39,7 @@ function doPost(e) {
 function handleRequest(method, e) {
   let result;
   try {
-    const path = String(e.pathInfo || '').replace(/^\/+|\/+$/g, '');
+    const path = String(e.parameter.path || e.pathInfo || '').replace(/^\/+|\/+$/g, '');
     const route = ROUTES[method + ' ' + path];
     if (!route) throw new ApiError('NOT_FOUND', 'Unknown path: ' + method + ' /' + path);
 
