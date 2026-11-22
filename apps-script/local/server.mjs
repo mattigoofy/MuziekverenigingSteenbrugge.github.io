@@ -1,6 +1,6 @@
 // Local backend: runs the real Apps Script code (../*.js) at http://localhost:8787/exec.
-// Code changes apply immediately (no restart needed); the spreadsheet is kept in memory
-// and starts fresh on every start.
+// Code changes apply immediately (no restart needed); the spreadsheet is kept in memory and
+// reloaded when the xlsx file is saved (changes made through the API are then lost).
 //
 //   node local/server.mjs [--port 8787] [--fake-auth] [--xlsx path/to/export.xlsx | --example]
 //
@@ -100,32 +100,48 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const argValue = name => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
   const xlsx = (args.includes('--example') || args.includes('--voorbeeld')) ? null : argValue('--xlsx') || env.LOCAL_XLSX || findXlsx();
 
-  let spreadsheet;
-  if (xlsx) {
-    spreadsheet = await loadXlsx(path.resolve(xlsx));
-    console.log(`Spreadsheet: ${path.resolve(xlsx)}`);
-    if (extraEmails.length) console.warn('LOCAL_MEMBERS is ignored: the members come from your own spreadsheet.');
-  } else {
-    spreadsheet = createFixture({ extraEmails });
-    console.log(`Spreadsheet: example (members piet@example.com, an@example.com, jan@example.com${extraEmails.length ? ', ' + extraEmails.join(', ') : ''})`);
-  }
-
   const properties = { CALENDAR_ID: 'local-calendar', ...env };
-  const backend = createBackend({ spreadsheet, properties, fakeAuth, anyCalendar: true, log: console.log });
 
-  // show right away whether the code can read the spreadsheet (tabs, settings)
-  try {
-    const health = backend.request('GET', 'health').body;
-    console.log(health.ok ? `Check: ok, attendance sheet "${health.data.title}"` : `Check: ${health.error.code} ${health.error.message}`);
-    const pub = backend.request('GET', 'public/activities').body;
-    console.log(pub.ok ? `Check: ${pub.data.activities.length} public activities` : `Check public list: ${pub.error.message}`);
-    const hidden = backend.call('hiddenColumns');
-    console.log(!hidden.filterActive
-      ? "Check: no 'Op LedenActiviteiten' column, members see every attendance column"
-      : `Check: ${hidden.hidden.length} attendance column(s) hidden from members` + hidden.hidden.map(t => `\n  - ${t}`).join(''));
+  async function load() {
+    let spreadsheet;
+    if (xlsx) {
+      spreadsheet = await loadXlsx(path.resolve(xlsx));
+      console.log(`Spreadsheet: ${path.resolve(xlsx)}`);
+      if (extraEmails.length) console.warn('LOCAL_MEMBERS is ignored: the members come from your own spreadsheet.');
+    } else {
+      spreadsheet = createFixture({ extraEmails });
+      console.log(`Spreadsheet: example (members piet@example.com, an@example.com, jan@example.com${extraEmails.length ? ', ' + extraEmails.join(', ') : ''})`);
+    }
+    const backend = createBackend({ spreadsheet, properties, fakeAuth, anyCalendar: true, log: console.log });
+
+    // show right away whether the code can read the spreadsheet (tabs, settings)
+    try {
+      const health = backend.request('GET', 'health').body;
+      console.log(health.ok ? `Check: ok, attendance sheet "${health.data.title}"` : `Check: ${health.error.code} ${health.error.message}`);
+      const pub = backend.request('GET', 'public/activities').body;
+      console.log(pub.ok ? `Check: ${pub.data.activities.length} public activities` : `Check public list: ${pub.error.message}`);
+      const hidden = backend.call('hiddenColumns');
+      console.log(!hidden.filterActive
+        ? "Check: no 'Op LedenActiviteiten' column, members see every attendance column"
+        : `Check: ${hidden.hidden.length} attendance column(s) hidden from members` + hidden.hidden.map(t => `\n  - ${t}`).join(''));
+    }
+    catch (err) {
+      console.warn(`Check failed: ${err.message}`);
+    }
+    return backend;
   }
-  catch (err) {
-    console.warn(`Check failed: ${err.message}`);
+
+  // the server always talks to the latest load: saving the xlsx reloads it, no restart needed
+  let current = await load();
+  const backend = new Proxy({}, { get: (_, key) => current[key] });
+  if (xlsx) {
+    let timer = null;
+    fs.watchFile(path.resolve(xlsx), { interval: 1000 }, () => {
+      clearTimeout(timer);
+      // wait until the save is finished; a half-written file keeps the previous version
+      timer = setTimeout(() => load().then(b => { current = b; console.log('Spreadsheet reloaded'); })
+        .catch(err => console.warn(`Reload failed, keeping the previous version: ${err.message}`)), 1000);
+    });
   }
 
   createServer({ backend, log: console.log }).listen(port, '127.0.0.1', () => {
