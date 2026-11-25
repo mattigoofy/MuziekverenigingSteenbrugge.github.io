@@ -52,13 +52,15 @@ function orchestraUrl(layout, title, date, members) {
     use_images: true,
     image_url: ORCHESTRA_IMAGE_URL,
     show_labels: false,
-    show_row_count: false,
+    show_row_count: true,
     invert: false,
     date: date,
     conductor: { name: getSetting('Dirigent', 'CONDUCTOR') || '', color: '#8b4513', image: 'conductor.png' },
     sections: sections
   };
-  return ORCHESTRA_MAPPER_URL + '?compress=' + encodeURIComponent(JSON.stringify(config)) + '&view=1';
+  // # & % + as JSON \u escapes: the Sheets app on a phone decodes the link once more, and these would cut or split it
+  const json = JSON.stringify(config).replace(/[#&%+]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+  return ORCHESTRA_MAPPER_URL + '?compress=' + encodeURIComponent(json) + '&view=1';
 }
 
 //
